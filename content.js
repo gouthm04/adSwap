@@ -3,7 +3,7 @@ console.log("[adSwap] Spotify detector started");
 
 let previousResult = "";
 let previousAdState = false;
-let adSwapEnabled = false;
+let adSwapEnabled = true;
 
 
 
@@ -92,7 +92,7 @@ function startDetection() {
     console.log("[adSwap] Detection started");
     detectSpotifyContent();
 
-    detectionInterval = setInterval(detectSpotifyContent, 3000);
+    detectionInterval = setInterval(detectSpotifyContent, 500);
 }
 
 function stopDetection() {
