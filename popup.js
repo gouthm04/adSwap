@@ -1,16 +1,43 @@
 
 const toggle = document.getElementById("enabled");
 const status = document.getElementById("status");
-const playAudio = document.getElementById("playAudio");
-const stopAudio = document.getElementById("stopAudio");
 
-toggle.addEventListener("change", function () {
-    if (toggle.checked) {
-        status.textContent = "AdSwap is enabled";
-    } else {
-        status.textContent = "AdSwap is disabled";
+// Read the saved setting when the popup opens.
+chrome.storage.local.get(
+    { enabled: true },
+    function (settings) {
+        toggle.checked = settings.enabled;
+        updateStatus(settings.enabled);
     }
+);
+
+// Save the setting whenever the checkbox changes.
+toggle.addEventListener("change", function () {
+    const enabled = toggle.checked;
+
+    chrome.storage.local.set({ enabled: enabled });
+    updateStatus(enabled);
+
+    // Tell the content script that the setting changed.
+    chrome.tabs.query(
+        { url: "https://open.spotify.com/*" },
+        function (tabs) {
+            for (const tab of tabs) {
+                chrome.tabs.sendMessage(tab.id, {
+                    action: "SET_ENABLED",
+                    enabled: enabled
+                }).catch(() => {});
+            }
+        }
+    );
 });
+
+function updateStatus(enabled) {
+    status.textContent = enabled
+        ? "AdSwap is enabled"
+        : "AdSwap is disabled";
+}
+
 
 playAudio.addEventListener("click", async () => {
     try {

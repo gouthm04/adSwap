@@ -10,8 +10,14 @@
         "resources": ["audio/test-tone.wav"],
         "matches": ["https://open.spotify.com/*"]
     }],
-    "permissions": ["offscreen"],
+    "permissions": ["offscreen", "storage", "tabs"],
     "background": {
         "service_worker": "background.js"
-    }
+    },
+    "content_scripts": [
+        {
+            "matches": ["https://open.spotify.com/*"],
+            "js": ["content.js"]
+        }
+    ]
 }
