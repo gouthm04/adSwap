@@ -1,5 +1,6 @@
 console.log("[adSwap] Spotify detector started");
 let previousResult = "";
+let previousAdState = false;
 
 function detectSpotifyContent() {
     const player = document.querySelector(
@@ -16,21 +17,27 @@ function detectSpotifyContent() {
     const isAdvertisement =
         /\bAdvertisement\s*[·•]/i.test(playerText);
 
+    if (isAdvertisement !== previousAdState) {
+    previousAdState = isAdvertisement;
+
+    chrome.runtime.sendMessage({
+        action: isAdvertisement ? "PLAY_AUDIO" : "STOP_AUDIO"
+    }).catch(error => {
+        console.error("[adSwap] Audio message failed:", error);
+    });
+
+    console.log(
+        isAdvertisement
+            ? "[adSwap] Advertisement started"
+            : "[adSwap] Advertisement ended"
+    );
+}
+
     const titleElement = player.querySelector(
         'span[data-encore-id="text"]'
     );
 
-    console.log("[adSwap] Debug:", {
-        playerFound: Boolean(player),
-        titleElementFound: Boolean(titleElement),
-        titleText: titleElement?.innerText,
-        matchingSpans: player
-            ? [...player.querySelectorAll('span[data-encore-id="text"]')]
-                .map(el => el.innerText.trim())
-                .filter(Boolean)
-            : []
-    });
-
+    
     const playPauseButton = player.querySelector(
         '[data-testid="control-button-playpause"]'
     );
